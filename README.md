@@ -39,6 +39,13 @@ The return code is equal to the amount of failed testcases.
 
 Options can be given to the test script:
 
+
+**4. Optional Before and After functions**
+
+You can optionally define a function named Before that will be executed before each test case to do some common setup.
+
+Likewise, you can define an After function to run after each testcase.
+
 ```bash
 $ bash ./bashunit.bash
 Usage: <testscript> [options...]
@@ -139,6 +146,15 @@ Options:
     `$2` Expected
 
     Assert that a given integer is less than or equal to an expected integer.
+
+* `assertFileEqual($1, $2)`
+
+    `$1` Actual file
+
+    `$2` Expected field
+
+    Assert that a given file equals an expected file.
+
 
 * `skip()`
 

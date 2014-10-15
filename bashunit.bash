@@ -30,6 +30,20 @@ assertEqual() {
     if [ $? -eq 0 ] ; then _passed ; else _failed "$1" "$2" ; fi
 }
 
+assertFileEqual() {
+    F=$(mktemp)
+    diff $1 $2 > $F
+    if [ $? -eq 0 ] ; then _passed ; else 
+        _failed "$1" "$2"
+
+        if [ $verbose -eq 3 ] ; then
+            echo -e "    \033[31mExpected and actual files differ\033[0m"
+            cat $F | sed 's/^/    /'
+        fi
+    fi
+    rm -f $F
+}
+
 # Assert that a given output string is not equal to an expected string.
 #
 # $1: Output
@@ -164,7 +178,22 @@ runTests() {
         exit 0
     fi
 
-    for tc in $testcases ; do $tc ; done
+    local before=$(grep "^ *\(function \)*Before *\\(\\)" $0 | \
+        grep -o Before)
+    local after=$(grep "^ *\(function \)*After *\\(\\)" $0 | \
+        grep -o After)
+
+    for tc in $testcases 
+    do 
+        $before
+        $tc 
+        $after
+
+        if [[ $? != 0 ]]; then
+            echo -e "\033[37;1m$tc\033[0m:\033[31mFailed\033[0m" 
+            bashunit_failed=$((bashunit_failed+1)) 
+        fi
+    done
 
     if [ $verbose -ge 1 ] ; then
         echo "Done. $bashunit_passed passed." \
